@@ -3,9 +3,7 @@
 
 
 
-RCSwitch mySwitch = RCSwitch();
 
-MODE_CONTROL_t Mode;
 
 
 
