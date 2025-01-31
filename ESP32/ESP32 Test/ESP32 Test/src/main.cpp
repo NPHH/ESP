@@ -7,7 +7,7 @@ void setup()
 
     Serial.println("Begin...");
 
-
+    digitalWrite(GPIO0)
 }
 
 void loop() 
