@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    * { 
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      padding: 10px 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    /* KHUNG BỌC TO RỘNG 96% MÀN HÌNH PHONE */
+    .card {
+      width: 96vw;
+      padding: 36px 24px;
+      background: #ffffff;
+      border-radius: 32px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+      border: 1px solid #cbd5e1;
+    }
+
+    /* TIÊU ĐỀ 100PX THEO ĐÚNG YÊU CẦU */
+    h2 {
+      margin: 0 0 40px 0; /* MŨI TÊN 1: Nới khoảng cách từ tiêu đề xuống khung IP/MAC */
+      font-size: 100px;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.0;
+      letter-spacing: -2px;
+    }
+
+    /* MŨI TÊN 2: KHUNG IP/MAC NỚI RỘNG CHIỀU CAO & PADDING */
+    .info-box {
+      background: #f8fafc;
+      padding: 32px 24px; /* Tăng padding để khung rộng cao ra */
+      border-radius: 24px;
+      border: 2px solid #e2e8f0;
+      margin-bottom: 36px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 20px 0; /* Giãn khoảng cách giữa các dòng IP/MAC */
+      font-size: 32px; /* Chữ IP NAS / Địa chỉ MAC to rõ */
+      color: #475569;
+      font-weight: 700;
+    }
+
+    .info-row:first-child { margin-top: 0; }
+    .info-row:last-child { margin-bottom: 0; }
+
+    .info-val {
+      color: #0f172a;
+      font-weight: 900;
+      font-size: 34px; /* Số IP / MAC to vượt trội */
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    /* NHÃN PIN */
+    label {
+      display: block;
+      font-size: 34px;
+      font-weight: 900;
+      margin-bottom: 16px;
+      color: #334155;
+    }
+
+    /* Ô NHẬP PIN CAO RỘNG KHỔNG LỒ */
+    input {
+      width: 100%;
+      height: 100px;
+      font-size: 50px;
+      font-weight: 900;
+      border-radius: 24px;
+      border: 4px solid #cbd5e1;
+      background: #f8fafc;
+      color: #0f172a;
+      outline: none;
+      text-align: center;
+      letter-spacing: 12px;
+    }
+
+    input:focus {
+      border-color: #2563eb;
+    }
+
+    /* NÚT BẤM KHỔNG LỒ (CAO 110PX) */
+    button {
+      width: 100%;
+      height: 110px;
+      margin-top: 36px;
+      border: none;
+      border-radius: 28px;
+      background: #2563eb;
+      color: #ffffff;
+      font-size: 42px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 10px 28px rgba(37, 99, 235, 0.4);
+    }
+
+    button:active { 
+      background: #1d4ed8; 
+      transform: scale(0.98);
+    }
+    
+    button:disabled { 
+      opacity: 0.5; 
+    }
+
+    #status {
+      margin-top: 24px;
+      font-size: 30px;
+      font-weight: 800;
+      text-align: center;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>NAS Wake On LAN</h2>
+    
+    <div class="info-box">
+      <div class="info-row">
+        <span>IP NAS</span>
+        <span class="info-val">192.168.1.200</span>
+      </div>
+      <div class="info-row">
+        <span>Địa chỉ MAC</span>
+        <span class="info-val">10:90:28:EA:2F:DC</span>
+      </div>
+    </div>
+
+    <label for="pin">Mã PIN bảo mật</label>
+    <input id="pin" 
+           type="password" 
+           inputmode="numeric" 
+           pattern="[0-9]*"
+           autocomplete="current-password" 
+           placeholder="••••">
+
+    <button id="wake" onclick="wakeNAS()">BẬT NAS NGAY</button>
+    <div id="status" role="status">Sẵn sàng.</div>
+  </div>
+
+  <script>
+    function wakeNAS() {
+      const pin = document.getElementById("pin").value;
+      const button = document.getElementById("wake");
+      const status = document.getElementById("status");
+
+      if (!pin) {
+        status.textContent = "Vui lòng nhập PIN.";
+        return;
+      }
+
+      button.disabled = true;
+      status.textContent = "Đang gửi yêu cầu...";
+
+      google.script.run
+        .withSuccessHandler(function(result) {
+          status.textContent = result.message;
+          button.disabled = false;
+        })
+        .withFailureHandler(function(error) {
+          status.textContent = "Lỗi: " + error.message;
+          button.disabled = false;
+        })
+        .requestWake(pin);
+    }
+  </script>
+</body>
+</html>
