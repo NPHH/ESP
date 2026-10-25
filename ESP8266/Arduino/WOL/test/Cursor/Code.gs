@@ -1,12 +1,11 @@
-
 const PROP = PropertiesService.getScriptProperties();
 
 function setupConfig() {
-  // Chay ham nay mot lan trong Apps Script.
-  // Thay 2 chuoi ben duoi bang gia tri rieng cua ban.
   PROP.setProperty("WEB_PIN", "1234");
   PROP.setProperty("DEVICE_KEY", "ESP8266WOL920PLUS_A7F93C21");
   PROP.setProperty("COMMAND", "IDLE");
+  PROP.setProperty("STATUS", "IDLE");
+  PROP.setProperty("WAIT_TIME", "150");
 }
 
 function doGet(e) {
@@ -21,6 +20,7 @@ function doGet(e) {
 
     if (action === "poll") {
       const command = PROP.getProperty("COMMAND") || "IDLE";
+
       return jsonOutput({
         ok: true,
         command: command === "WOL_PENDING" ? "WOL" : "NONE"
@@ -30,46 +30,65 @@ function doGet(e) {
     if (action === "ack") {
       const lock = LockService.getScriptLock();
       lock.waitLock(5000);
+
       try {
-        PROP.setProperty("COMMAND", "IDLE");
+        const status = e.parameter.status || "IDLE";
+        const waitTime = e.parameter.waitTime || "150";
+
+        PROP.setProperty("STATUS", status);
+        PROP.setProperty("WAIT_TIME", waitTime);
+
+        if (status === "ONLINE" || status === "FAILED") {
+          PROP.setProperty("COMMAND", "IDLE");
+        }
       } finally {
         lock.releaseLock();
       }
+
       return jsonOutput({ ok: true });
     }
   }
 
-  return HtmlService.createHtmlOutputFromFile("Index")
-    .setTitle("Wake On LAN NAS");
+  // Render Template để ghép các file HTML lại với nhau
+  return HtmlService.createTemplateFromFile("Index")
+    .evaluate()
+    .setTitle("Wake On LAN NAS")
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+}
+
+// Hàm bắt buộc phải có để nhúng Stylesheet và JavaScript vào Index.html
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
 function requestWake(pin) {
   if (!pin || pin !== PROP.getProperty("WEB_PIN")) {
-    return { ok: false, message: "PIN khong dung." };
+    return { ok: false, message: "PIN không đúng." };
   }
 
   const lock = LockService.getScriptLock();
   lock.waitLock(5000);
 
   try {
-    const current = PROP.getProperty("COMMAND") || "IDLE";
-
-    if (current === "WOL_PENDING") {
-      return {
-        ok: true,
-        message: "Lenh bat NAS dang cho ESP xu ly."
-      };
-    }
-
     PROP.setProperty("COMMAND", "WOL_PENDING");
+    PROP.setProperty("STATUS", "WAITING_ESP");
 
     return {
       ok: true,
-      message: "Da gui yeu cau. Cho ESP nhan lenh."
+      message: "Đã gửi yêu cầu. Đang chờ ESP xử lý..."
     };
   } finally {
     lock.releaseLock();
   }
+}
+
+function getSystemStatus() {
+  return {
+    ok: true,
+    command: PROP.getProperty("COMMAND") || "IDLE",
+    status: PROP.getProperty("STATUS") || "IDLE",
+    waitTime: parseInt(PROP.getProperty("WAIT_TIME") || "150", 10)
+  };
 }
 
 function jsonOutput(data) {
