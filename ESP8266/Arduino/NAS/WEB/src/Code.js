@@ -44,46 +44,68 @@ function ProjectPrint()
 
 
 
-function testDoGet() 
-{
-    const mockEvent = 
-    {
-        parameter: 
-        {
-            action: "poll",
-            key: "MÃ_KEY_CỦA_BẠN",
-            debug: "true"
-        }
-    };
-    
-    // In trực tiếp danh sách thông số truyền vào ra ô Log
-    console.log("Tham số truyền vào (e.parameter):", mockEvent.parameter);
-
-    // Gọi hàm doGet(e) để chạy logic và in kết quả parameter trả về
-    const result = doGet(mockEvent);
-}
-
-
-
-
-
-
-
-
 
 /**********************************************************************************************************************************
 
 **********************************************************************************************************************************/
-function doGet(e) 
+function doGet(Data) 
 {
-    console.log("doGet nhận được e.parameter:", e?.parameter);
+    console.log("[1] Bat dau doGet");
+
+    const Action = Data && Data.parameter ? Data.parameter.ACTION : "";
+
+    console.log("[2] ACTION =", Action);
     
-    if (e && e.parameter && e.parameter.debug === "true") 
+    if(Action === "POLL" || Action === "ACK") 
     {
-       
+        const KEY = Data.parameter.KEY || "";
+
+        if(!KEY || KEY !== Properties.getProperty("DEVICE_KEY")) 
+        {
+            return JSONOutput({ STATUS: false, ERROR: "Unauthorized" });
+        }
+
+        if(Action === "POLL") 
+        {
+            console.log("[3] Dang xu ly POLL");
+
+            const Command = Properties.getProperty("COMMAND") || "IDLE";
+
+            return JSONOutput({STATUS: true, CMD: Command === "WOL_PENDING" ? "WOL" : "NONE"});
+        }
+
+        if (Action === "ACK") 
+        {
+            const lock = LockService.getScriptLock();
+
+            lock.waitLock(5000);
+
+            try 
+            {
+                const status = Data.parameter.status || "IDLE";
+
+                const waitTime = Data.parameter.waitTime || "150";
+
+                Properties.setProperty("STATUS", status);
+
+                Properties.setProperty("WAIT_TIME", waitTime);
+
+                if (status === "ONLINE" || status === "FAILED") 
+                {
+                    Properties.setProperty("COMMAND", "IDLE");
+                }
+            } 
+            finally 
+            {
+                lock.releaseLock();
+            }
+
+            return JSONOutput({ STATUS: true });
+        }
     }
 
-    
+
+
 
     return HtmlService.createTemplateFromFile('Index')
             .evaluate()
@@ -98,4 +120,14 @@ function doGet(e)
 function Include(filename) 
 {
     return HtmlService.createHtmlOutputFromFile(filename).getContent();
+}
+
+/**********************************************************************************************************************************
+
+**********************************************************************************************************************************/
+function JSONOutput(data) 
+{
+    return ContentService
+        .createTextOutput(JSON.stringify(data))
+        .setMimeType(ContentService.MimeType.JSON);
 }

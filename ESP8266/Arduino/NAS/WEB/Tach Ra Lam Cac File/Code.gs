@@ -1,9 +1,104 @@
 
+// function testDoGet() 
+// {
+//     const mockEvent = 
+//     {
+//         parameter: 
+//         {
+//             action: "poll",
+//             key: "MÃ_KEY_CỦA_BẠN",
+//             debug: "true"
+//         }
+//     };
+    
+//     // In trực tiếp danh sách thông số truyền vào ra ô Log
+//     console.log("Tham số truyền vào (e.parameter):", mockEvent.parameter);
+
+//     // Gọi hàm doGet(e) để chạy logic và in kết quả parameter trả về
+//     const result = doGet(mockEvent);
+// }
+
+
+
+// function testDoGet() 
+// {
+//     // 1. Gia lap tham so ESP8266 gui len Web App
+//     const mockEvent = 
+//     {
+//         parameter: 
+//         {
+//             ACTION: "POLL",
+//             KEY: "12344321",
+//             DEBUG: "true"
+//         }
+//     };
+
+//     console.log("===== TEST doGet =====");
+
+//     console.log("Tham so gui len:");
+
+//     console.log(JSON.stringify(mockEvent.parameter, null, 2));
+
+//     console.log(mockEvent);
+
+
+//     const result = doGet(mockEvent);
+
+//     // 3. Kiem tra doi tuong phan hoi
+//     console.log("Doi tuong phan hoi:");
+
+//     console.log(result);
+
+  
+//     if (result && typeof result.getContent === "function")
+//     {
+//         const responseBody = result.getContent();
+
+//         console.log("===== RESPONSE BODY =====");
+//         console.log(responseBody);
+
+//         // Thu phan tich JSON neu phan hoi la JSON
+//         try
+//         {
+//             const json = JSON.parse(responseBody);
+
+//             console.log("===== JSON PARSED =====");
+//             console.log(JSON.stringify(json, null, 2));
+//         }
+//         catch (error)
+//         {
+//             console.log("Phan hoi khong phai JSON hop le.");
+//         }
+//     }
+//     else
+//     {
+//         console.log("Khong doc duoc noi dung phan hoi.");
+//         console.log("Hay kiem tra gia tri return cua doGet().");
+//     }
+
+//     console.log("===== KET THUC TEST =====");
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function doGet(e) {
   const action = e && e.parameter ? e.parameter.action : "";
 
-  if (action === "poll" || action === "ack") {
+  if (action === "poll" || action === "ack") 
+  {
     const key = e.parameter.key || "";
 
     if (!key || key !== PROP.getProperty("DEVICE_KEY")) {
