@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- Icon hiển thị trên màn hình chính iPhone (Kích thước chuẩn 180x180 px) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="https://lh3.googleusercontent.com/d/1Je5xbat_D-gpc-yLvMQjYhBa40Eua_Hj">
+
+    <!-- Tiêu đề đề xuất mặc định khi người dùng thêm vào màn hình chính -->
+    <meta name="apple-mobile-web-app-title" content="NAS WOL">
+
+    <!-- Chạy ở chế độ ứng dụng độc lập (mất thanh địa chỉ Safari khi mở từ màn hình chính) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+
+
+
+
+
+  <?!= Include('Stylesheet'); ?>
+</head>
+<body>
+  <div class="card">
+    <h2>NAS Wake On LAN</h2>
+    
+    <div class="info-box">
+      <div class="info-row">
+        <span>IP NAS</span>
+        <span class="info-val">192.168.1.200</span>
+      </div>
+      <div class="info-row">
+        <span>Địa chỉ MAC</span>
+        <span class="info-val">10:90:28:EA:2F:DC</span>
+      </div>
+    </div>
+
+    <label for="pin">Mã PIN bảo mật</label>
+    <input id="pin" 
+           type="password" 
+           inputmode="numeric" 
+           pattern="[0-9]*"
+           autocomplete="current-password" 
+           placeholder="••••">
+
+    <button id="wake" onclick="wakeNAS()">BẬT NAS NGAY</button>
+    <div id="status" role="status">Sẵn sàng.</div>
+    <div id="timer"></div>
+  </div>
+
+  <?!= Include('JavaScript'); ?>
+</body>
+</html>
