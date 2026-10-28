@@ -32,6 +32,24 @@ function ProjectSetConfig()
 /**********************************************************************************************************************************
 
 **********************************************************************************************************************************/
+function GetSystemStatus() 
+{
+    return {
+        ok: true,
+
+        command: Properties.getProperty("COMMAND") || "IDLE",
+
+        status: Properties.getProperty("STATUS") || "IDLE",
+
+        waitTime: parseInt(Properties.getProperty("WAIT_TIME") || "150", 10)
+
+        
+    };
+}
+
+/**********************************************************************************************************************************
+
+**********************************************************************************************************************************/
 function ProjectPrint() 
 {   
     console.log("WEB_PIN:", WEB_PIN);
@@ -114,31 +132,37 @@ function doGet(Data)
             .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
+/******************************************************************************************************************************
 
+******************************************************************************************************************************/
+function RequestWake(Pin)
+{
+    if (!Pin || Pin !== Properties.getProperty("WEB_PIN"))
+    {
+        return { STATUS: false, MESSAGE: "PIN không đúng." };
+    }
 
+    try
+    {
+        const hasLock = lock.tryLock(5000);
 
+        if (!hasLock) 
+        {
+            return { STATUS: false, MESSAGE: "Hệ thống đang bận, vui lòng thử lại sau." };
+        }
 
+        Properties.setProperty("COMMAND", "WOL_PENDING");
 
-function requestWake(pin) {
-  if (!pin || pin !== PROP.getProperty("WEB_PIN")) {
-    return { ok: false, message: "PIN không đúng." };
-  }
+        Properties.setProperty("STATUS", "WAITING_ESP");
 
-  const lock = LockService.getScriptLock();
-  lock.waitLock(5000);
-
-  try {
-    PROP.setProperty("COMMAND", "WOL_PENDING");
-    PROP.setProperty("STATUS", "WAITING_ESP");
-
-    return {
-      ok: true,
-      message: "Đã gửi yêu cầu. Đang chờ ESP xử lý..."
-    };
-  } finally {
-    lock.releaseLock();
-  }
+        return { STATUS: true, MESSAGE: "Đã gửi yêu cầu. Đang chờ ESP xử lý..." };
+    }
+    finally
+    {
+        lock.releaseLock();
+    }
 }
+
 
 
 
@@ -160,3 +184,5 @@ function JSONOutput(data)
         .createTextOutput(JSON.stringify(data))
         .setMimeType(ContentService.MimeType.JSON);
 }
+
+

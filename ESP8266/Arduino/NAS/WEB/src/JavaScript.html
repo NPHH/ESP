@@ -1,10 +1,8 @@
 <script>
-
-
 /******************************************************************************************************************************
-    
+
 ******************************************************************************************************************************/
-function WakeNAS() 
+function WakeNAS()
 {
     console.log("1. Hàm WakeNAS() bắt đầu chạy");
 
@@ -24,7 +22,7 @@ function WakeNAS()
 
     console.log("5. TimerEL = ", TimerEL);
 
-    if(!Pin) 
+    if (!Pin)
     {
         Status.textContent = "Vui lòng nhập PIN.";
 
@@ -34,7 +32,7 @@ function WakeNAS()
     }
 
     Button.disabled = true;
-    
+
     Status.style.color = "#64748b";
 
     Status.textContent = "Đang gửi yêu cầu...";
@@ -46,13 +44,13 @@ function WakeNAS()
     console.log("8. Bắt đầu gọi requestWake()");
 
     google.script.run
-        .WithSuccessHandler(function(Result) 
+        .withSuccessHandler(function (Result) 
         {
             console.log("9. Máy chủ trả kết quả:", Result);
 
-            Status.textContent = Result.message;
+            Status.textContent = Result.MESSAGE;
 
-            if(Result.ok) 
+            if (Result.STATUS) 
             {
                 console.log("10. Yêu cầu được chấp nhận");
 
@@ -68,7 +66,7 @@ function WakeNAS()
             }
         })
 
-        .WithFailureHandler(function(Error) 
+        .withFailureHandler(function (Error) 
         {
             console.error("11. Lỗi gọi máy chủ:", Error);
 
@@ -78,10 +76,9 @@ function WakeNAS()
         })
 
         .RequestWake(Pin);
+
+        
 }
-
-
-
 
 
 </script>
