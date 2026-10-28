@@ -114,6 +114,35 @@ function doGet(Data)
             .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
+
+
+
+
+
+function requestWake(pin) {
+  if (!pin || pin !== PROP.getProperty("WEB_PIN")) {
+    return { ok: false, message: "PIN không đúng." };
+  }
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(5000);
+
+  try {
+    PROP.setProperty("COMMAND", "WOL_PENDING");
+    PROP.setProperty("STATUS", "WAITING_ESP");
+
+    return {
+      ok: true,
+      message: "Đã gửi yêu cầu. Đang chờ ESP xử lý..."
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+
+
+
 /**********************************************************************************************************************************
 
 **********************************************************************************************************************************/

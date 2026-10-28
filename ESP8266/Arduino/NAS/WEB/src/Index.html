@@ -36,17 +36,23 @@
       </div>
     </div>
 
-    <label for="pin">Mã PIN bảo mật</label>
-    <input id="pin" 
+
+
+    <label for="PIN">Mã PIN bảo mật</label>
+
+    <input id="PIN" 
            type="password" 
            inputmode="numeric" 
            pattern="[0-9]*"
            autocomplete="current-password" 
            placeholder="••••">
 
-    <button id="wake" onclick="wakeNAS()">BẬT NAS NGAY</button>
-    <div id="status" role="status">Sẵn sàng.</div>
-    <div id="timer"></div>
+    <button id="WAKE" onclick="WakeNAS()">BẬT NAS NGAY</button>
+
+    <div id="STATUS" role="STATUS">Sẵn sàng.</div>
+
+    <div id="TIMER"></div>
+
   </div>
 
   <?!= Include('JavaScript'); ?>

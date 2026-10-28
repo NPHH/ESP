@@ -1,0 +1,87 @@
+<script>
+
+
+/******************************************************************************************************************************
+    
+******************************************************************************************************************************/
+function WakeNAS() 
+{
+    console.log("1. Hàm WakeNAS() bắt đầu chạy");
+
+    const Pin = document.getElementById("PIN").value;
+
+    const Button = document.getElementById("WAKE");
+
+    const Status = document.getElementById("STATUS");
+
+    const TimerEL = document.getElementById("TIMER");
+
+    console.log("2. Pin = ", Pin);
+
+    console.log("3. Button = ", Button);
+
+    console.log("4. Status = ", Status);
+
+    console.log("5. TimerEL = ", TimerEL);
+
+    if(!Pin) 
+    {
+        Status.textContent = "Vui lòng nhập PIN.";
+
+        console.warn("6. PIN đang trống, kết thúc hàm");
+
+        return;
+    }
+
+    Button.disabled = true;
+    
+    Status.style.color = "#64748b";
+
+    Status.textContent = "Đang gửi yêu cầu...";
+
+    TimerEL.textContent = "";
+
+    console.log("7. Đã cập nhật giao diện");
+
+    console.log("8. Bắt đầu gọi requestWake()");
+
+    google.script.run
+        .WithSuccessHandler(function(Result) 
+        {
+            console.log("9. Máy chủ trả kết quả:", Result);
+
+            Status.textContent = Result.message;
+
+            if(Result.ok) 
+            {
+                console.log("10. Yêu cầu được chấp nhận");
+
+                startCountdown(150);
+
+                startTracking();
+            } 
+            else 
+            {
+                console.warn("10. Máy chủ từ chối yêu cầu");
+
+                Button.disabled = false;
+            }
+        })
+
+        .WithFailureHandler(function(Error) 
+        {
+            console.error("11. Lỗi gọi máy chủ:", Error);
+
+            Status.textContent = "Lỗi: " + Error.message;
+
+            Button.disabled = false;
+        })
+
+        .RequestWake(Pin);
+}
+
+
+
+
+
+</script>

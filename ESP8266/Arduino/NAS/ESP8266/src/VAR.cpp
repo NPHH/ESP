@@ -117,8 +117,12 @@ bool WIFIWebResponse(const String& Action, String& Body)
 {
     String URL = String(WEB_ADDRESS_URL) + "?ACTION=" + Action + "&KEY=" + DEVICE_KEY;
 
-    //Serial.println(URL);
+    #if 0
 
+    Serial.println(URL);
+
+    #endif
+    
     HTTPClient http;
 
     http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
@@ -227,6 +231,6 @@ void POLLCommand(void)
         }
     }
 }
-
+                                     
 
 
