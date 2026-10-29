@@ -52,7 +52,7 @@
 
 #define IP_ADDRESS_2                                                                                1
 
-#define IP_ADDRESS_3                                                                                200
+#define IP_ADDRESS_3                                                                                5
 
 /******************************************************************************************************************************
 
@@ -82,7 +82,7 @@
 /******************************************************************************************************************************
     
 ******************************************************************************************************************************/
-#define WOL_WAIT_TIME_TO_PING                                                                       120000        // Thoi gian NAS Khoi Dong Cho Den Khi Ping Duoc (ms)
+#define WOL_WAIT_TIME_TO_PING                                                                       20000   //120000        // Thoi gian NAS Khoi Dong Cho Den Khi Ping Duoc (ms)
 
 #define WOL_TIME_EVERY_PING                                                                         3000          // Thoi gian Giua Cac Lan Ping (ms)
 
@@ -142,7 +142,7 @@ extern const uint32_t                                                           
 
 extern uint32_t                                                                                     LastPoll;
 
-
+extern uint32_t                                                                                     WOLStateTimer;
 
 
 
@@ -187,9 +187,13 @@ void POLLCommand(void);
 
 bool WIFIWebResponse(const String& Action, String& Body);
 
+bool SendWOL(void);
 
+bool SendACKWithRetry(const String& Status, uint32_t WaitTimeSec = 0);
 
+bool SendACKStatus(const String& status, uint32_t WaitTimeSec = 0);
 
+void WOLProcess(void);
 
 /******************************************************************************************************************************
 

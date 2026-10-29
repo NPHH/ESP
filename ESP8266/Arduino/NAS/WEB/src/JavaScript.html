@@ -1,4 +1,21 @@
 <script>
+
+
+/******************************************************************************************************************************
+
+******************************************************************************************************************************/
+let CountDownTimer = null;
+
+let RemainingTime = 0;
+
+let TrackingInterval = null;
+
+let WaitingESPSince = 0;
+
+const ESP_TIMEOUT_MS = 30000; 
+
+
+
 /******************************************************************************************************************************
 
 ******************************************************************************************************************************/
@@ -14,13 +31,13 @@ function WakeNAS()
 
     const TimerEL = document.getElementById("TIMER");
 
-    console.log("2. Pin = ", Pin);
+    // console.log("2. Pin = ", Pin);
 
-    console.log("3. Button = ", Button);
+    // console.log("3. Button = ", Button);
 
-    console.log("4. Status = ", Status);
+    // console.log("4. Status = ", Status);
 
-    console.log("5. TimerEL = ", TimerEL);
+    // console.log("5. TimerEL = ", TimerEL);
 
     if (!Pin)
     {
@@ -44,40 +61,240 @@ function WakeNAS()
     console.log("8. Bắt đầu gọi requestWake()");
 
     google.script.run
+        //  Chạy khi hàm phía Server xử lý xong và không gặp lỗi hệ thống.
         .withSuccessHandler(function (Result) 
         {
             console.log("9. Máy chủ trả kết quả:", Result);
 
+            //  Hiển thị thông báo (ví dụ: "Đã gửi yêu cầu..." hoặc "PIN không đúng.") lên màn hình giao diện.
             Status.textContent = Result.MESSAGE;
-
+  
+            //  Result.STATUS === true
             if (Result.STATUS) 
             {
                 console.log("10. Yêu cầu được chấp nhận");
 
-                startCountdown(150);
+                //  Kích hoạt đếm ngược 150 giây trên giao diện.
+                //StartCountDown(150);
 
-                startTracking();
+                //  Bắt đầu theo dõi trạng thái xem ESP đã xử lý xong và máy tính đã lên mạng chưa.
+                StartTracking();
             } 
             else 
             {
                 console.warn("10. Máy chủ từ chối yêu cầu");
 
+                //  Mở lại nút bấm để người dùng có thể nhập lại PIN hoặc bấm thử lại.
                 Button.disabled = false;
             }
         })
 
+        //  Chạy khi xảy ra lỗi kết nối mạng, lỗi Server Crash, hoặc sập script giữa chừng.
         .withFailureHandler(function (Error) 
         {
             console.error("11. Lỗi gọi máy chủ:", Error);
 
+            //  Báo lỗi kỹ thuật trực tiếp cho người dùng.
             Status.textContent = "Lỗi: " + Error.message;
 
+            //  Mở lại nút bấm để người dùng có thể nhập lại PIN hoặc bấm thử lại.
             Button.disabled = false;
         })
 
         .RequestWake(Pin);
 
         
+}
+
+/******************************************************************************************************************************
+
+******************************************************************************************************************************/
+function StartCountDown(Seconds)
+{
+    //  Xóa bộ đếm cũ nếu đang chạy. Việc này giúp tránh hiện tượng "chạy đè" 
+    //  (nhiều bộ đếm cùng chạy một lúc khiến số giây giảm nhanh gấp đôi, gấp ba).
+    if (CountDownTimer) clearInterval(CountDownTimer);
+
+    //  Gán giá trị đầu vào (Seconds) cho biến đếm ngược toàn cục.
+    RemainingTime = Seconds;
+
+    CountDownTimer = setInterval(function() 
+    {
+        const TimerEL = document.getElementById("TIMER");
+
+        if (RemainingTime > 0) 
+        {
+            const min = Math.floor(RemainingTime / 60);
+
+            const sec = RemainingTime % 60;
+
+            const secStr = sec < 10 ? "0" + sec : sec;
+
+            TimerEL.textContent = "Thời gian chờ còn lại: " + min + ":" + secStr;
+
+            RemainingTime--;
+        } 
+        else 
+        {
+            TimerEL.textContent = "Đang kiểm tra kết quả Ping...";
+            
+            clearInterval(CountDownTimer);
+        }
+    }, 1000);
+}
+
+
+
+
+
+
+
+
+
+
+/******************************************************************************************************************************
+
+******************************************************************************************************************************/
+function StartTracking() 
+{
+    // 1. Xóa timer tracking cũ nếu đang chạy
+    if (TrackingInterval) clearInterval(TrackingInterval);
+
+    let IsCountDownStarted = false; // Cờ đánh dấu đã gọi đếm ngược chưa
+
+    WaitingEspSince = Date.now();   // Mốc thời gian bắt đầu chờ ESP
+
+    // 2. Chạy vòng lặp kiểm tra trạng thái mỗi 2 giây
+    TrackingInterval = setInterval(function() 
+    {
+        google.script.run
+            .withSuccessHandler(function(Response) 
+            {
+                // Nếu phản hồi rỗng thì bỏ qua
+                if (!Response) return;
+
+                const StatusEL = document.getElementById("STATUS");
+
+                const Button   = document.getElementById("WAKE");
+
+                const TimerEL  = document.getElementById("TIMER");
+
+                // --- TRƯỜNG HỢP 1: ĐANG CHỜ ESP NHẬN LỆNH ---
+                if (Response.STATUS === "WAITING_ESP") 
+                {
+                    StatusEL.style.color = "#64748b";
+
+                    StatusEL.textContent = "Đang chờ ESP nhận lệnh...";
+
+                    // Kiểm tra quá thời gian (Timeout) nếu ESP mất Wifi/Nguồn
+                    if (Date.now() - WaitingEspSince > ESP_TIMEOUT_MS) 
+                    {
+                        StatusEL.style.color = "#dc2626";
+
+                        StatusEL.textContent = "🔴 ESP không phản hồi. Kiểm tra nguồn/WiFi của ESP.";
+                        
+                        Button.disabled = false;
+
+                        if (TimerEL) TimerEL.textContent = "";
+
+                        // Dừng tất cả các bộ đếm
+                        StopAllTimers();
+                    }
+                }
+
+                // --- TRƯỜNG HỢP 2: ESP ĐÃ NHẬN LỆNH VÀ ĐANG KHỞI ĐỘNG (BOOTING/WOL_SENT) ---
+                else if (Response.STATUS === "BOOTING" || Response.STATUS === "WOL_SENT") 
+                {
+                    StatusEL.style.color = "#d97706";
+
+                    StatusEL.textContent = "ESP đã gửi gói WOL! Đang chờ NAS khởi động...";
+
+                    // Chỉ kích hoạt đếm ngược 1 lần duy nhất khi nhận được WAIT_TIME từ ESP
+                    if (!IsCountDownStarted) 
+                    {
+                        IsCountDownStarted = true;
+                        
+                        // Ưu tiên lấy WAIT_TIME động từ ESP trả về (mặc định 150s nếu lỗi)
+                        const WaitTimeSec = Number(Response.WAIT_TIME) || 150;
+                        
+                        // Gọi hàm đếm ngược đã chuẩn hóa của chúng ta
+                        StartCountDown(WaitTimeSec);
+                    }
+                }
+
+                // --- TRƯỜNG HỢP 3: NAS ĐÃ KHỞI ĐỘNG THÀNH CÔNG (PING OK) ---
+                else if (Response.STATUS === "ONLINE") 
+                {
+                    StatusEL.style.color = "#16a34a";
+
+                    StatusEL.textContent = "🟢 THÀNH CÔNG: NAS đã bật và hoạt động!";
+                    
+                    Button.disabled = false;
+
+                    if (TimerEL) TimerEL.textContent = "";
+                    
+                    StopAllTimers();
+                }
+
+                // --- TRƯỜNG HỢP 4: THẤT BẠI (HẾT GIỜ MÀ PING KHÔNG THẤY NAS) ---
+                else if (Response.STATUS === "FAILED") 
+                {
+                    StatusEL.style.color = "#dc2626";
+
+                    StatusEL.textContent = "🔴 THẤT BẠI: Đã phát gói tin nhưng NAS không phản hồi Ping.";
+                    
+                    Button.disabled = false;
+
+                    if (TimerEL) TimerEL.textContent = "";
+                    
+                    StopAllTimers();
+                }
+            })
+            .withFailureHandler(function(Error) 
+            {
+                console.error("Lỗi khi kiểm tra trạng thái:", Error);
+            })
+
+            .GetStatus(); // Hàm gọi phía Server Google Apps Script
+    }, 2000);
+}
+
+/******************************************************************************************************************************
+
+******************************************************************************************************************************/
+function StopAllTimers() 
+{
+    if (TrackingInterval) 
+    {
+        clearInterval(TrackingInterval);
+
+        TrackingInterval = null;
+    }
+    if (CountDownTimer) 
+    {
+        clearInterval(CountDownTimer);
+
+        CountDownTimer = null;
+    }
+}
+
+
+
+/******************************************************************************************************************************
+
+******************************************************************************************************************************/
+function GetStatus() 
+{
+    const Status = Properties.getProperty("STATUS") || "IDLE";
+
+    // Lấy WAIT_TIME do ESP cập nhật (mặc định 150 nếu chưa có)
+    const WaitTime = parseInt(Properties.getProperty("WAIT_TIME")) || 150;
+    
+    return {
+        STATUS: Status,
+
+        WAIT_TIME: WaitTime
+    };
 }
 
 

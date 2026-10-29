@@ -31,7 +31,7 @@ void loop()
 {
     POLLCommand();
 
-  
+    WOLProcess();
 
 
     unsigned long CurrentMillis = millis();
