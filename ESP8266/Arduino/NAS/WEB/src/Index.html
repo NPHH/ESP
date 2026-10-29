@@ -14,40 +14,59 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-
-
-
-
-
   <?!= Include('Stylesheet'); ?>
 </head>
 <body>
-  <div class="card">
+  <div class="card" style="position: relative;">
+    <!-- NÚT SETTING Ở GÓC TRÊN BÊN PHẢI -->
+    <button id="BTN_SETTING" type="button" onclick="ToggleSettings()" style="position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; margin: 0; padding: 0; background: transparent; border: none; box-shadow: none; font-size: 20px; cursor: pointer;">⚙️</button>
+
     <h2>NAS Wake On LAN</h2>
     
-    <div class="info-box">
-      <div class="info-row">
-        <span>IP NAS</span>
-        <span class="info-val">192.168.1.200</span>
+    <!-- MAN HINH CHINH: BẬT NAS -->
+    <div id="MAIN_VIEW">
+      <div class="info-box">
+        <div class="info-row">
+          <span>IP NAS</span>
+          <span id="DISP_IP" class="info-val">192.168.1.200</span>
+        </div>
+        <div class="info-row">
+          <span>Địa chỉ MAC</span>
+          <span id="DISP_MAC" class="info-val">10:90:28:EA:2F:DC</span>
+        </div>
       </div>
-      <div class="info-row">
-        <span>Địa chỉ MAC</span>
-        <span class="info-val">10:90:28:EA:2F:DC</span>
-      </div>
+
+      <label for="PIN">Mã PIN bảo mật</label>
+
+      <input id="PIN" 
+             type="password" 
+             inputmode="numeric" 
+             pattern="[0-9]*"
+             autocomplete="current-password" 
+             placeholder="••••">
+
+      <button id="WAKE" onclick="WakeNAS()">BẬT NAS NGAY</button>
     </div>
 
+    <!-- MAN HINH CAU HINH: AN MAC DINH -->
+    <div id="SETTING_VIEW" style="display: none; margin-top: 10px;">
+      <div class="info-box" style="text-align: left;">
+        <label style="font-size: 14px; margin-bottom: 4px;">ĐỊA CHỈ IP NAS</label>
+        <input id="CFG_IP" type="text" placeholder="192.168.1.200" style="height: 42px; font-size: 16px; letter-spacing: 1px; margin-bottom: 12px; text-align: left; padding: 0 10px;">
 
+        <label style="font-size: 14px; margin-bottom: 4px;">ĐỊA CHỈ MAC NAS</label>
+        <input id="CFG_MAC" type="text" placeholder="10:90:28:EA:2F:DC" style="height: 42px; font-size: 16px; letter-spacing: 1px; margin-bottom: 12px; text-align: left; padding: 0 10px;">
 
-    <label for="PIN">Mã PIN bảo mật</label>
+        <label style="font-size: 14px; margin-bottom: 4px;">MÃ PIN CŨ (XÁC NHẬN)</label>
+        <input id="CFG_OLD_PIN" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="••••" style="height: 42px; font-size: 18px; margin-bottom: 12px;">
 
-    <input id="PIN" 
-           type="password" 
-           inputmode="numeric" 
-           pattern="[0-9]*"
-           autocomplete="current-password" 
-           placeholder="••••">
+        <label style="font-size: 14px; margin-bottom: 4px;">MÃ PIN MỚI (ĐỂ TRỐNG NẾU KHÔNG ĐỔI)</label>
+        <input id="CFG_NEW_PIN" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="••••" style="height: 42px; font-size: 18px; margin-bottom: 8px;">
+      </div>
 
-    <button id="WAKE" onclick="WakeNAS()">BẬT NAS NGAY</button>
+      <button id="SAVE_CFG" type="button" onclick="SaveSettings()" style="background: #16a34a;">LƯU CẤU HÌNH</button>
+      <button type="button" onclick="ToggleSettings()" style="background: #64748b; margin-top: 8px;">QUAY LẠI</button>
+    </div>
 
     <div id="STATUS" role="STATUS">Sẵn sàng.</div>
 

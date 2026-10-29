@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <?!= Include('Stylesheet'); ?>
+</head>
+<body>
+    <div class="card">
+        <h2>BẬT MÁY CHỦ NAS</h2>
+
+        <!-- KHU VỰC CẤU HÌNH IP VÀ MAC -->
+        <div class="info-box">
+            <label style="font-size: 14px; margin-bottom: 4px;">ĐỊA CHỈ IP NAS:</label>
+            <input type="text" id="NAS_IP" style="height: 40px; font-size: 16px; letter-spacing: 1px; margin-bottom: 12px;" placeholder="192.168.1.100">
+
+            <label style="font-size: 14px; margin-bottom: 4px;">ĐỊA CHỈ MAC NAS:</label>
+            <input type="text" id="NAS_MAC" style="height: 40px; font-size: 16px; letter-spacing: 1px; margin-bottom: 12px;" placeholder="11:22:33:44:55:66">
+            
+            <button type="button" id="SAVE_CFG" onclick="SaveConfiguration()" style="height: 40px; font-size: 15px; margin-top: 5px; background: #475569;">LƯU CẤU HÌNH</button>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 20px 0;">
+
+        <!-- KHU VỰC BẬT NAS -->
+        <label for="PIN">MÃ PIN BẢO MẬT:</label>
+        <input type="password" id="PIN" maxlength="6" placeholder="****">
+
+        <button type="button" id="WAKE" onclick="WakeNAS()">BẬT NAS NGAY</button>
+
+        <div id="STATUS">Đang tải cấu hình...</div>
+        <div id="TIMER"></div>
+    </div>
+
+    <?!= Include('JavaScript'); ?>
+</body>
+</html>

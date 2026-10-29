@@ -31,6 +31,43 @@ function ProjectSetConfig()
     Properties.setProperty("STATUS", "IDLE");
     
     Properties.setProperty("WAIT_TIME", "150");
+
+    Properties.setProperty("NAS_IP", "192.168.1.200");
+
+    Properties.setProperty("NAS_MAC", "10:90:28:EA:2F:DC");
+}
+
+/**********************************************************************************************************************************
+
+**********************************************************************************************************************************/
+function GetConfig()
+{
+    const Properties = PropertiesService.getScriptProperties();
+
+    return {
+        NAS_IP: Properties.getProperty("NAS_IP") || "192.168.1.200",
+
+        NAS_MAC: Properties.getProperty("NAS_MAC") || "11:22:33:44:55:66"
+    };
+}
+
+/**********************************************************************************************************************************
+
+**********************************************************************************************************************************/
+function SaveConfig(Data)
+{
+    const Properties = PropertiesService.getScriptProperties();
+
+    if (!Data || Data.PIN !== Properties.getProperty("WEB_PIN"))
+    {
+        return { STATUS: false, MESSAGE: "Mã PIN không đúng!" };
+    }
+
+    if (Data.NAS_IP) Properties.setProperty("NAS_IP", Data.NAS_IP.trim());
+
+    if (Data.NAS_MAC) Properties.setProperty("NAS_MAC", Data.NAS_MAC.trim());
+
+    return { STATUS: true, MESSAGE: "Đã cập nhật IP và MAC thành công!" };
 }
 
 /**********************************************************************************************************************************
